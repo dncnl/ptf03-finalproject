@@ -3,128 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ML Churn Prediction Dashboard - AUF CCS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Churn Prediction Dashboard - AUF CCS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .input-focus {
-            transition: all 0.3s ease;
-        }
-        
-        .input-focus:focus {
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
-            transform: translateY(-2px);
-        }
-        
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-gradient:active {
-            transform: translateY(0);
-        }
-        
-        .metric-card {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .metric-card:hover {
-            border-color: rgba(102, 126, 234, 0.5);
-            transform: translateY(-4px);
-        }
-        
-        .success-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        
-        .danger-badge {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-    </style>
 </head>
 <body>
-    <div class="min-h-screen px-4 py-8 md:py-12">
-        <div class="max-w-2xl mx-auto">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="toggle-icon" id="themeIcon">Moon</span>
+        <span id="themeLabel">Dark</span>
+    </button>
+
+    <!-- Main Page Wrapper -->
+    <div class="page-wrapper">
+        <div class="container">
             
             <!-- Header Section -->
-            <div class="text-center mb-10">
-                <div class="inline-block mb-4">
-                    <div class="text-5xl md:text-6xl font-bold gradient-text">
-                        ⚡
-                    </div>
-                </div>
-                <h1 class="text-4xl md:text-5xl font-bold text-white mb-3">
-                    Churn Prediction
-                </h1>
-                <p class="text-xl text-white/80 font-light">
-                    AUF CCS Machine Learning Dashboard
-                </p>
+            <div class="header">
+                <h1 class="header-title">Churn Prediction</h1>
+                <p class="header-subtitle">Machine Learning Classification Model - AUF CCS</p>
             </div>
             
             <!-- Main Card -->
-            <div class="glass-effect rounded-3xl shadow-2xl p-8 md:p-12 mb-8">
+            <div class="card">
                 
                 <!-- Prediction Form -->
-                <div id="predictionForm" class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-8 gradient-text">
-                        Customer Information
-                    </h2>
+                <div id="predictionForm">
+                    <div class="card-header">
+                        <h2 class="card-title">Customer Information</h2>
+                    </div>
                     
                     <form id="churnForm" class="space-y-6">
                         <!-- Tenure Input -->
                         <div class="form-group">
-                            <label for="tenure" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Tenure (months)
-                            </label>
+                            <label for="tenure">Tenure (months)</label>
                             <input
                                 type="number"
                                 id="tenure"
@@ -132,16 +44,13 @@
                                 min="0"
                                 max="72"
                                 placeholder="Enter tenure in months"
-                                class="input-focus w-full px-5 py-3 border-2 border-gray-200 rounded-xl focus:border-transparent focus:outline-none text-gray-700 placeholder-gray-400"
                                 required
                             >
                         </div>
                         
                         <!-- Monthly Charges Input -->
                         <div class="form-group">
-                            <label for="MonthlyCharges" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Monthly Charges ($)
-                            </label>
+                            <label for="MonthlyCharges">Monthly Charges ($)</label>
                             <input
                                 type="number"
                                 id="MonthlyCharges"
@@ -149,20 +58,16 @@
                                 min="0"
                                 step="0.01"
                                 placeholder="Enter monthly charges"
-                                class="input-focus w-full px-5 py-3 border-2 border-gray-200 rounded-xl focus:border-transparent focus:outline-none text-gray-700 placeholder-gray-400"
                                 required
                             >
                         </div>
                         
                         <!-- Contract Dropdown -->
                         <div class="form-group">
-                            <label for="Contract" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Contract Type
-                            </label>
+                            <label for="Contract">Contract Type</label>
                             <select
                                 id="Contract"
                                 name="Contract"
-                                class="input-focus w-full px-5 py-3 border-2 border-gray-200 rounded-xl focus:border-transparent focus:outline-none text-gray-700 bg-white"
                                 required
                             >
                                 <option value="" disabled selected>Select a contract type</option>
@@ -174,13 +79,10 @@
                         
                         <!-- Internet Service Dropdown -->
                         <div class="form-group">
-                            <label for="InternetService" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Internet Service
-                            </label>
+                            <label for="InternetService">Internet Service</label>
                             <select
                                 id="InternetService"
                                 name="InternetService"
-                                class="input-focus w-full px-5 py-3 border-2 border-gray-200 rounded-xl focus:border-transparent focus:outline-none text-gray-700 bg-white"
                                 required
                             >
                                 <option value="" disabled selected>Select internet service</option>
@@ -193,7 +95,7 @@
                         <!-- Submit Button -->
                         <button
                             type="submit"
-                            class="btn-gradient w-full py-4 px-6 rounded-xl text-white font-bold text-lg mt-8"
+                            class="btn btn-primary"
                         >
                             Get Prediction
                         </button>
@@ -201,159 +103,70 @@
                 </div>
                 
                 <!-- Results Section (Hidden by default) -->
-                <div id="resultsSection" class="hidden mb-8 fade-in">
-                    <div class="border-t-2 border-gray-200 pt-8">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6 gradient-text">
-                            Prediction Result
-                        </h2>
-                        
-                        <div id="resultCard" class="p-8 rounded-2xl text-center mb-6">
-                            <p class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">
-                                Predicted Outcome
-                            </p>
-                            <p id="predictionResult" class="text-5xl font-bold mb-4">
-                                <!-- Result will be inserted here -->
-                            </p>
-                            <div class="flex items-center justify-center gap-4">
-                                <span class="text-gray-700 font-medium">Confidence:</span>
-                                <span id="confidenceScore" class="text-2xl font-bold gradient-text">
-                                    <!-- Confidence will be inserted here -->
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <!-- Clear Button -->
-                        <button
-                            type="button"
-                            onclick="resetForm()"
-                            class="w-full py-3 px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl transition-all duration-300"
-                        >
-                            Make Another Prediction
-                        </button>
+                <div id="resultsSection" class="hidden results-section">
+                    <div class="card-header">
+                        <h2 class="card-title">Prediction Result</h2>
                     </div>
+                    
+                    <div id="resultCard" class="result-card">
+                        <p class="result-label">Predicted Outcome</p>
+                        <p id="predictionResult" class="result-value"></p>
+                        <div style="margin-top: 1.5rem;">
+                            <p class="result-confidence-label">Confidence Score</p>
+                            <span id="confidenceScore" class="result-confidence-value"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Clear Button -->
+                    <button
+                        type="button"
+                        onclick="resetForm()"
+                        class="btn btn-secondary"
+                    >
+                        Make Another Prediction
+                    </button>
                 </div>
                 
             </div>
             
             <!-- Model Insights Section -->
-            <div class="mb-12">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">
-                    Model Insights
-                </h2>
+            <div class="metrics-section">
+                <h2 class="metrics-title">Model Performance Metrics</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="metrics-grid">
                     <!-- Accuracy Card -->
-                    <div class="metric-card rounded-2xl p-6 text-center">
-                        <div class="text-4xl font-bold gradient-text mb-2">
-                            82%
-                        </div>
-                        <p class="text-gray-700 font-semibold">Accuracy</p>
-                        <p class="text-sm text-gray-500 mt-2">Model prediction accuracy</p>
+                    <div class="metric-card">
+                        <div class="metric-value">82%</div>
+                        <p class="metric-label">Accuracy</p>
+                        <p class="metric-description">Overall prediction accuracy</p>
                     </div>
                     
                     <!-- Precision Card -->
-                    <div class="metric-card rounded-2xl p-6 text-center">
-                        <div class="text-4xl font-bold gradient-text mb-2">
-                            79%
-                        </div>
-                        <p class="text-gray-700 font-semibold">Precision</p>
-                        <p class="text-sm text-gray-500 mt-2">True positive rate</p>
+                    <div class="metric-card">
+                        <div class="metric-value">79%</div>
+                        <p class="metric-label">Precision</p>
+                        <p class="metric-description">True positive classification</p>
                     </div>
                     
                     <!-- Recall Card -->
-                    <div class="metric-card rounded-2xl p-6 text-center">
-                        <div class="text-4xl font-bold gradient-text mb-2">
-                            85%
-                        </div>
-                        <p class="text-gray-700 font-semibold">Recall</p>
-                        <p class="text-sm text-gray-500 mt-2">Detection rate</p>
+                    <div class="metric-card">
+                        <div class="metric-value">85%</div>
+                        <p class="metric-label">Recall</p>
+                        <p class="metric-description">Detection sensitivity</p>
                     </div>
                 </div>
             </div>
             
             <!-- Footer -->
-            <div class="text-center text-white/70 text-sm font-light">
-                <p>Churn Prediction ML Model v1.0 • AUF CCS</p>
+            <div class="footer">
+                <p>Churn Prediction ML Model v1.0 • AUF CCS • 2026</p>
             </div>
             
         </div>
     </div>
+    </div>
     
-    <!-- JavaScript -->
-    <script>
-        const form = document.getElementById('churnForm');
-        const resultsSection = document.getElementById('resultsSection');
-        const predictionForm = document.getElementById('predictionForm');
-        
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = {
-                tenure: document.getElementById('tenure').value,
-                MonthlyCharges: document.getElementById('MonthlyCharges').value,
-                Contract: document.getElementById('Contract').value,
-                InternetService: document.getElementById('InternetService').value
-            };
-            
-            try {
-                // Send prediction request
-                const response = await fetch('/predict', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Display results
-                    displayResults(data.prediction, data.confidence);
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            }
-        });
-        
-        function displayResults(prediction, confidence) {
-            // Hide form, show results
-            predictionForm.style.display = 'none';
-            resultsSection.classList.remove('hidden');
-            resultsSection.classList.add('fade-in');
-            
-            // Set prediction result
-            const resultCard = document.getElementById('resultCard');
-            const predictionResult = document.getElementById('predictionResult');
-            const confidenceScore = document.getElementById('confidenceScore');
-            
-            if (prediction === 'Churn') {
-                resultCard.classList.remove('success-badge');
-                resultCard.classList.add('danger-badge');
-                predictionResult.textContent = '⚠️ Churn Likely';
-                predictionResult.style.color = '#ef4444';
-            } else {
-                resultCard.classList.remove('danger-badge');
-                resultCard.classList.add('success-badge');
-                predictionResult.textContent = '✓ No Churn';
-                predictionResult.style.color = '#10b981';
-            }
-            
-            confidenceScore.textContent = confidence;
-            
-            // Scroll to results
-            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-        
-        function resetForm() {
-            form.reset();
-            predictionForm.style.display = 'block';
-            resultsSection.classList.add('hidden');
-        }
-    </script>
+    <!-- External JavaScript -->
+    <script src="{{ url_for('static', filename='css/js/script.js') }}"></script>
 </body>
 </html>
