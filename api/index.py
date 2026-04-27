@@ -19,9 +19,9 @@ def predict():
         monthly_charges = float(data.get('MonthlyCharges', 0))
         contract = data.get('Contract', '')
         internet_service = data.get('InternetService', '')
-        
+        model = data.get('model', 'random_forest')
+
         # Mock prediction logic
-        # Randomly decide between Churn and No Churn
         churn_probability = 0.85
         prediction = random.choice(['Churn', 'No Churn'])
         

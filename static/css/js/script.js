@@ -1,6 +1,6 @@
 /**
  * Churn Prediction Dashboard - Main JavaScript Module
- * Handles theme management, form submission, and prediction display
+ * Handles theme management, model selection, form submission, and prediction display
  * Last Updated: 2026
  */
 
@@ -14,37 +14,24 @@ const ThemeManager = (() => {
   const THEME_LIGHT = 'light';
   const THEME_DARK = 'dark';
 
-  // DOM Elements
   let themeToggle = null;
-  let themeIcon = null;
-  let themeLabel = null;
+  let iconSun = null;
+  let iconMoon = null;
   let body = null;
 
-  /**
-   * Initialize theme manager
-   */
   const init = () => {
     themeToggle = document.getElementById('themeToggle');
-    themeIcon = document.getElementById('themeIcon');
-    themeLabel = document.getElementById('themeLabel');
+    iconSun = document.getElementById('themeIconSun');
+    iconMoon = document.getElementById('themeIconMoon');
     body = document.body;
 
-    if (!themeToggle) {
-      console.warn('Theme toggle element not found');
-      return;
-    }
+    if (!themeToggle) return;
 
-    // Load saved theme or default to light
     const savedTheme = localStorage.getItem(STORAGE_KEY) || THEME_LIGHT;
     applyTheme(savedTheme);
-
-    // Add event listener
     themeToggle.addEventListener('click', toggleTheme);
   };
 
-  /**
-   * Apply theme to document
-   */
   const applyTheme = (theme) => {
     if (theme === THEME_DARK) {
       body.classList.add(DARK_MODE_CLASS);
@@ -56,43 +43,94 @@ const ThemeManager = (() => {
     localStorage.setItem(STORAGE_KEY, theme);
   };
 
-  /**
-   * Toggle between light and dark theme
-   */
   const toggleTheme = () => {
     const isDarkMode = body.classList.contains(DARK_MODE_CLASS);
-    const newTheme = isDarkMode ? THEME_LIGHT : THEME_DARK;
-    applyTheme(newTheme);
+    applyTheme(isDarkMode ? THEME_LIGHT : THEME_DARK);
   };
 
-  /**
-   * Update theme UI elements
-   */
   const updateUI = (isDark) => {
-    if (themeIcon && themeLabel) {
+    if (iconSun && iconMoon) {
       if (isDark) {
-        themeIcon.textContent = 'Sun';
-        themeLabel.textContent = 'Light';
+        iconSun.classList.remove('hidden');
+        iconMoon.classList.add('hidden');
       } else {
-        themeIcon.textContent = 'Moon';
-        themeLabel.textContent = 'Dark';
+        iconSun.classList.add('hidden');
+        iconMoon.classList.remove('hidden');
       }
     }
   };
 
-  /**
-   * Get current theme
-   */
   const getCurrentTheme = () => {
     return body.classList.contains(DARK_MODE_CLASS) ? THEME_DARK : THEME_LIGHT;
   };
 
-  return {
-    init,
-    toggleTheme,
-    getCurrentTheme,
-    applyTheme
+  return { init, toggleTheme, getCurrentTheme, applyTheme };
+})();
+
+// ============================================
+// Model Selector Module
+// ============================================
+
+const ModelSelector = (() => {
+  const STORAGE_KEY = 'selectedModel';
+  let selectedModel = 'random_forest';
+  let highlight = null;
+  let buttons = [];
+
+  const MODEL_LABELS = {
+    random_forest: 'Random Forest',
+    xgboost: 'XGBoost',
+    gmm: 'GMM',
+    dbscan: 'DBSCAN'
   };
+
+  const init = () => {
+    highlight = document.getElementById('modelHighlight');
+    buttons = Array.from(document.querySelectorAll('.model-option'));
+
+    if (!buttons.length) return;
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && MODEL_LABELS[saved]) {
+      selectedModel = saved;
+      buttons.forEach(btn => btn.classList.remove('active'));
+      const target = buttons.find(btn => btn.dataset.model === saved);
+      if (target) target.classList.add('active');
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => selectModel(btn));
+    });
+
+    // Position highlight on first active button after render
+    requestAnimationFrame(() => moveHighlight());
+  };
+
+  const selectModel = (btn) => {
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedModel = btn.dataset.model;
+    localStorage.setItem(STORAGE_KEY, selectedModel);
+    moveHighlight();
+  };
+
+  const moveHighlight = () => {
+    if (!highlight) return;
+    const active = document.querySelector('.model-option.active');
+    if (!active) return;
+
+    const parent = active.parentElement;
+    const parentRect = parent.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+
+    highlight.style.width = activeRect.width + 'px';
+    highlight.style.transform = 'translateX(' + (activeRect.left - parentRect.left - 4) + 'px)';
+  };
+
+  const getSelected = () => selectedModel;
+  const getLabel = () => MODEL_LABELS[selectedModel] || selectedModel;
+
+  return { init, getSelected, getLabel };
 })();
 
 // ============================================
@@ -100,17 +138,15 @@ const ThemeManager = (() => {
 // ============================================
 
 const FormHandler = (() => {
-  // DOM Elements
   let form = null;
   let resultsSection = null;
   let predictionForm = null;
   let resultCard = null;
   let predictionResult = null;
   let confidenceScore = null;
+  let confidenceBar = null;
+  let resultModelName = null;
 
-  /**
-   * Initialize form handler
-   */
   const init = () => {
     form = document.getElementById('churnForm');
     resultsSection = document.getElementById('resultsSection');
@@ -118,64 +154,63 @@ const FormHandler = (() => {
     resultCard = document.getElementById('resultCard');
     predictionResult = document.getElementById('predictionResult');
     confidenceScore = document.getElementById('confidenceScore');
+    confidenceBar = document.getElementById('confidenceBar');
+    resultModelName = document.getElementById('resultModelName');
 
-    if (!form) {
-      console.warn('Form element not found');
-      return;
-    }
-
+    if (!form) return;
     form.addEventListener('submit', handleSubmit);
   };
 
-  /**
-   * Handle form submission
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = 'Predicting...';
+    }
 
     const formData = {
       tenure: document.getElementById('tenure').value,
       MonthlyCharges: document.getElementById('MonthlyCharges').value,
       Contract: document.getElementById('Contract').value,
-      InternetService: document.getElementById('InternetService').value
+      InternetService: document.getElementById('InternetService').value,
+      model: ModelSelector.getSelected()
     };
 
     try {
       const response = await fetch('/predict', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
 
       const data = await response.json();
 
       if (data.success) {
-        displayResults(data.prediction, data.confidence);
+        displayResults(data.prediction, data.confidence, data.probability);
       } else {
         showError('Error: ' + (data.error || 'Unknown error occurred'));
       }
     } catch (error) {
       console.error('Prediction error:', error);
       showError('An error occurred while making the prediction. Please try again.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').textContent = 'Get Prediction';
+      }
     }
   };
 
-  /**
-   * Display prediction results
-   */
-  const displayResults = (prediction, confidence) => {
-    // Hide form, show results
+  const displayResults = (prediction, confidence, probability) => {
     if (predictionForm) predictionForm.style.display = 'none';
     if (resultsSection) resultsSection.classList.remove('hidden');
 
-    // Clear previous classes
     if (resultCard) {
       resultCard.classList.remove('result-success', 'result-danger');
     }
 
-    // Set prediction result
     if (prediction === 'Churn') {
       if (resultCard) resultCard.classList.add('result-danger');
       if (predictionResult) predictionResult.textContent = 'Churn Likely';
@@ -184,37 +219,36 @@ const FormHandler = (() => {
       if (predictionResult) predictionResult.textContent = 'No Churn';
     }
 
-    if (confidenceScore) {
-      confidenceScore.textContent = confidence;
+    if (confidenceScore) confidenceScore.textContent = confidence;
+
+    // Animate confidence bar
+    if (confidenceBar) {
+      const pct = probability ? (probability * 100) : parseFloat(confidence);
+      confidenceBar.style.width = '0%';
+      requestAnimationFrame(() => {
+        confidenceBar.style.width = pct + '%';
+      });
     }
 
-    // Scroll to results
+    if (resultModelName) resultModelName.textContent = ModelSelector.getLabel();
+
     if (resultsSection) {
       resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   };
 
-  /**
-   * Show error message
-   */
   const showError = (message) => {
     alert(message);
   };
 
-  /**
-   * Reset form to initial state
-   */
   const resetForm = () => {
     if (form) form.reset();
     if (predictionForm) predictionForm.style.display = 'block';
     if (resultsSection) resultsSection.classList.add('hidden');
+    if (confidenceBar) confidenceBar.style.width = '0%';
   };
 
-  return {
-    init,
-    resetForm,
-    displayResults
-  };
+  return { init, resetForm, displayResults };
 })();
 
 // ============================================
@@ -222,46 +256,34 @@ const FormHandler = (() => {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize theme manager
   ThemeManager.init();
-
-  // Initialize form handler
+  ModelSelector.init();
   FormHandler.init();
 
-  // Make resetForm globally accessible for inline onclick handlers
   window.resetForm = FormHandler.resetForm;
 
-  console.log('Churn Prediction Dashboard initialized');
+  // Recalculate highlight on resize
+  window.addEventListener('resize', () => {
+    ModelSelector.init();
+  });
 });
 
 // ============================================
 // Utility Functions
 // ============================================
 
-/**
- * Get stored theme preference
- */
 function getTheme() {
   return ThemeManager.getCurrentTheme();
 }
 
-/**
- * Set theme preference
- */
 function setTheme(theme) {
   ThemeManager.applyTheme(theme);
 }
 
-/**
- * Log application version
- */
 function getAppVersion() {
   return '1.0.0';
 }
 
-/**
- * Validate form input
- */
 function validateFormData(formData) {
   const tenure = parseFloat(formData.tenure);
   const monthlyCharges = parseFloat(formData.MonthlyCharges);
