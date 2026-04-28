@@ -174,37 +174,102 @@ function initFormSubmission() {
 function displayResults(result) {
   const predictionForm = document.getElementById("predictionForm");
   const resultsSection = document.getElementById("resultsSection");
-  const resultCard = document.getElementById("resultCard");
-  const predictionResult = document.getElementById("predictionResult");
-  const confidenceBar = document.getElementById("confidenceBar");
-  const confidenceScore = document.getElementById("confidenceScore");
-  const resultModelName = document.getElementById("resultModelName");
+  const supervisedResult = document.getElementById("supervisedResult");
+  const unsupervisedResult = document.getElementById("unsupervisedResult");
 
   // Hide form, show results
   predictionForm.classList.add("hidden");
   resultsSection.classList.remove("hidden");
 
-  // Update result card styling based on prediction
-  const isChurn = result.prediction === "Churn";
-  resultCard.classList.remove("result-success", "result-danger");
-  resultCard.classList.add(isChurn ? "result-danger" : "result-success");
-
-  // Update result values
-  predictionResult.textContent = result.prediction;
-  confidenceScore.textContent = result.confidence;
-  resultModelName.textContent = formatModelName(result.model);
-
-  // Animate confidence bar
-  const confidenceValue = parseFloat(result.confidence);
-  confidenceBar.style.width = "0%";
-
-  // Trigger animation after a small delay
-  setTimeout(() => {
-    confidenceBar.style.width = `${confidenceValue}%`;
-  }, 100);
+  // Display appropriate result based on model type
+  if (result.model_type === "supervised") {
+    displaySupervisedResult(result);
+    supervisedResult.classList.remove("hidden");
+    unsupervisedResult.classList.add("hidden");
+  } else {
+    displayUnsupervisedResult(result);
+    supervisedResult.classList.add("hidden");
+    unsupervisedResult.classList.remove("hidden");
+  }
 
   // Scroll to results
   resultsSection.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/**
+ * Display supervised prediction result with visual indicators
+ */
+function displaySupervisedResult(result) {
+  const predictionResult = document.getElementById("predictionResult");
+  const confidenceBar = document.getElementById("confidenceBar");
+  const confidenceScore = document.getElementById("confidenceScore");
+  const confidenceBadge = document.getElementById("confidenceBadge");
+  const resultModelName = document.getElementById("resultModelName");
+  const predictionVisual = document.getElementById("predictionVisual");
+
+  // Extract probability value
+  const probability = result.probability || 0;
+  const confidencePercent = Math.round(probability * 100);
+
+  // Update prediction result
+  const isChurn = result.prediction === "Churn";
+  predictionResult.textContent = result.prediction;
+  predictionResult.classList.remove("churn", "no-churn");
+  predictionResult.classList.add(isChurn ? "churn" : "no-churn");
+
+  // Update confidence score
+  confidenceScore.textContent = `${confidencePercent}%`;
+  confidenceScore.classList.add("confidence-percentage");
+
+  // Update confidence badge
+  let badgeText = "Low";
+  if (probability >= 0.7) badgeText = "High";
+  else if (probability >= 0.4) badgeText = "Medium";
+  confidenceBadge.textContent = badgeText;
+
+  // Update model name
+  resultModelName.textContent = formatModelName(result.model);
+
+  // Update prediction visual icon
+  predictionVisual.innerHTML = isChurn ? "⚠️" : "✅";
+  predictionVisual.classList.remove("churn", "no-churn");
+  predictionVisual.classList.add(isChurn ? "churn" : "no-churn");
+
+  // Animate confidence bar
+  confidenceBar.style.width = "0%";
+  setTimeout(() => {
+    confidenceBar.style.width = `${confidencePercent}%`;
+  }, 100);
+}
+
+/**
+ * Display unsupervised clustering result
+ */
+function displayUnsupervisedResult(result) {
+  const clusterName = document.getElementById("clusterName");
+  const clusterDescription = document.getElementById("clusterDescription");
+  const profileTenure = document.getElementById("profileTenure");
+  const profileCharges = document.getElementById("profileCharges");
+  const profileContract = document.getElementById("profileContract");
+  const profileSize = document.getElementById("profileSize");
+  const resultModelNameUnsup = document.getElementById("resultModelNameUnsup");
+  const clusterVisual = document.getElementById("clusterVisual");
+
+  // Update cluster information
+  clusterName.textContent = result.cluster_label || `Segment ${result.cluster_id}`;
+  clusterDescription.textContent = result.description;
+
+  // Update profile stats
+  profileTenure.textContent = result.profile?.avg_tenure || "N/A";
+  profileCharges.textContent = result.profile?.avg_monthly || "N/A";
+  profileContract.textContent = result.profile?.top_contract || "N/A";
+  profileSize.textContent = result.profile?.size || "N/A";
+
+  // Update model name
+  resultModelNameUnsup.textContent = formatModelName(result.model);
+
+  // Update cluster visual icon
+  clusterVisual.innerHTML = "🎯";
 }
 
 /**

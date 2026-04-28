@@ -1065,3 +1065,526 @@ body.dark-mode .footer {
     --border-dark: #4b5563;
   }
 }
+
+/* ============================================
+   IBM BRANDING & HEADER
+   ============================================ */
+
+.ibm-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 2px solid var(--border-light);
+}
+
+body.dark-mode .ibm-header {
+  border-bottom-color: var(--border-dark);
+}
+
+.ibm-logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.ibm-logo {
+  color: #0043ce;
+  filter: drop-shadow(0 2px 4px rgba(0, 67, 206, 0.2));
+}
+
+body.dark-mode .ibm-logo {
+  color: #0f62fe;
+}
+
+.ibm-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #0043ce;
+  letter-spacing: -0.02em;
+}
+
+body.dark-mode .ibm-title {
+  color: #0f62fe;
+}
+
+.header-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-light-secondary);
+  margin-top: var(--spacing-sm);
+}
+
+body.dark-mode .header-subtitle {
+  color: var(--text-dark-secondary);
+}
+
+/* ============================================
+   CONTENT GRID LAYOUT
+   ============================================ */
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.form-card,
+.results-card {
+  min-height: 500px;
+}
+
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   FORM STYLING
+   ============================================ */
+
+.form-required {
+  color: #da1e28;
+  font-weight: 700;
+}
+
+.form-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ============================================
+   RESULTS CARD
+   ============================================ */
+
+.results-card {
+  position: relative;
+}
+
+.prediction-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-xl);
+  min-height: 120px;
+}
+
+.prediction-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+.prediction-icon.churn {
+  background: rgba(218, 30, 40, 0.1);
+  color: #da1e28;
+}
+
+.prediction-icon.no-churn {
+  background: rgba(36, 161, 72, 0.1);
+  color: #24a148;
+}
+
+.cluster-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 67, 206, 0.1) 0%, rgba(15, 98, 254, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.result-content {
+  margin-bottom: var(--spacing-lg);
+}
+
+.result-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light-tertiary);
+  margin-bottom: var(--spacing-sm);
+}
+
+body.dark-mode .result-label {
+  color: var(--text-dark-tertiary);
+}
+
+.result-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-light-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+body.dark-mode .result-value {
+  color: var(--text-dark-primary);
+}
+
+.result-prediction.churn {
+  color: #da1e28;
+}
+
+.result-prediction.no-churn {
+  color: #24a148;
+}
+
+.segment-value {
+  color: #0043ce;
+}
+
+body.dark-mode .segment-value {
+  color: #0f62fe;
+}
+
+/* ============================================
+   CONFIDENCE SECTION
+   ============================================ */
+
+.confidence-section {
+  margin: var(--spacing-lg) 0;
+}
+
+.confidence-bar-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--bg-light-tertiary);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: var(--spacing-md) 0;
+}
+
+body.dark-mode .confidence-bar-track {
+  background-color: var(--bg-dark-tertiary);
+}
+
+.confidence-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0043ce 0%, #0f62fe 100%);
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(0, 67, 206, 0.4);
+}
+
+.confidence-percentage {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0043ce;
+  text-align: center;
+}
+
+body.dark-mode .confidence-percentage {
+  color: #0f62fe;
+}
+
+/* ============================================
+   RESULT METRICS
+   ============================================ */
+
+.result-metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.result-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--bg-light-secondary);
+  border-radius: var(--radius-lg);
+}
+
+body.dark-mode .result-stat {
+  background-color: var(--bg-dark-tertiary);
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light-tertiary);
+}
+
+body.dark-mode .stat-label {
+  color: var(--text-dark-tertiary);
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-light-primary);
+  margin-top: var(--spacing-xs);
+}
+
+body.dark-mode .stat-value {
+  color: var(--text-dark-primary);
+}
+
+/* ============================================
+   PROFILE GRID (UNSUPERVISED)
+   ============================================ */
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background-color: var(--bg-light-secondary);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+body.dark-mode .profile-item {
+  background-color: var(--bg-dark-tertiary);
+}
+
+.profile-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.profile-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light-tertiary);
+}
+
+body.dark-mode .profile-label {
+  color: var(--text-dark-tertiary);
+}
+
+.profile-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-light-primary);
+  margin-top: var(--spacing-xs);
+}
+
+body.dark-mode .profile-value {
+  color: var(--text-dark-primary);
+}
+
+/* ============================================
+   SECTION HEADERS
+   ============================================ */
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-light-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+body.dark-mode .section-title {
+  color: var(--text-dark-primary);
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: var(--text-light-tertiary);
+}
+
+body.dark-mode .section-subtitle {
+  color: var(--text-dark-tertiary);
+}
+
+/* ============================================
+   METRICS GRID VARIANTS
+   ============================================ */
+
+.metrics-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* ============================================
+   METRIC CARD ENHANCEMENTS
+   ============================================ */
+
+.metric-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.metric-icon.accent-blue {
+  background: rgba(0, 67, 206, 0.1);
+  color: #0043ce;
+}
+
+body.dark-mode .metric-icon.accent-blue {
+  background: rgba(15, 98, 254, 0.15);
+  color: #0f62fe;
+}
+
+.metric-icon.accent-green {
+  background: rgba(36, 161, 72, 0.1);
+  color: #24a148;
+}
+
+body.dark-mode .metric-icon.accent-green {
+  background: rgba(36, 161, 72, 0.15);
+}
+
+.metric-icon.accent-purple {
+  background: rgba(136, 100, 209, 0.1);
+  color: #8864d1;
+}
+
+body.dark-mode .metric-icon.accent-purple {
+  background: rgba(136, 100, 209, 0.15);
+}
+
+.metric-icon.accent-orange {
+  background: rgba(241, 194, 27, 0.1);
+  color: #f1c21b;
+}
+
+body.dark-mode .metric-icon.accent-orange {
+  background: rgba(241, 194, 27, 0.15);
+}
+
+.metric-icon.accent-red {
+  background: rgba(218, 30, 40, 0.1);
+  color: #da1e28;
+}
+
+body.dark-mode .metric-icon.accent-red {
+  background: rgba(218, 30, 40, 0.15);
+}
+
+.metric-icon.accent-teal {
+  background: rgba(0, 168, 168, 0.1);
+  color: #00a8a8;
+}
+
+body.dark-mode .metric-icon.accent-teal {
+  background: rgba(0, 168, 168, 0.15);
+}
+
+/* ============================================
+   BUTTON VARIANTS
+   ============================================ */
+
+.btn-lg {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* ============================================
+   FOOTER ENHANCEMENT
+   ============================================ */
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.footer-meta {
+  font-size: 0.75rem;
+  color: var(--text-light-tertiary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+body.dark-mode .footer-meta {
+  color: var(--text-dark-tertiary);
+}
+
+/* ============================================
+   RESPONSIVE IMPROVEMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .ibm-title {
+    font-size: 1.75rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ibm-header {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .ibm-logo-section {
+    flex-direction: column;
+  }
+
+  .prediction-icon,
+  .cluster-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+
+  .result-value {
+    font-size: 2rem;
+  }
+}
