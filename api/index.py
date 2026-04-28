@@ -4,11 +4,11 @@ import pandas as pd
 import numpy as np
 import os
 
-# Configure Flask with absolute paths for Vercel serverless compatibility
+# Configure Flask for Vercel serverless compatibility
 app = Flask(
     __name__,
-    template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../templates')),
-    static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../static')),
+    template_folder='../templates',
+    static_folder='../static',
     static_url_path='/static'
 )
 
