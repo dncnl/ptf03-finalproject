@@ -4,7 +4,13 @@ import pandas as pd
 import numpy as np
 import os
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+# Configure Flask with absolute paths for Vercel serverless compatibility
+app = Flask(
+    __name__,
+    template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../templates')),
+    static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../static')),
+    static_url_path='/static'
+)
 
 # Load all 4 model bundles
 models_dir = os.path.join(os.path.dirname(__file__), '..', 'models')
