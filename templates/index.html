@@ -1,255 +1,405 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Churn Prediction Dashboard - AUF CCS</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <!-- Theme Toggle Button -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <!-- IBM Plex Sans for Headings & Poppins for Body -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Heroicons SVG Library -->
+    <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18"></script>
+  </head>
+  <body>
+    <!-- Theme Toggle Button with Heroicons -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-        <svg id="themeIconSun" class="toggle-svg hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg id="themeIconMoon" class="toggle-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
+      <!-- Sun Icon (hidden by default) -->
+      <svg
+        id="themeIconSun"
+        class="toggle-svg hidden"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <!-- Moon Icon (visible by default in light mode) -->
+      <svg
+        id="themeIconMoon"
+        class="toggle-svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
     </button>
 
     <!-- Main Page Wrapper -->
     <div class="page-wrapper">
-        <div class="container">
+      <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+          <div class="header-badge">ML Classification</div>
+          <h1 class="header-title">Churn Prediction</h1>
+          <p class="header-subtitle">
+            Machine Learning Classification Model &mdash; AUF CCS
+          </p>
+        </header>
 
-            <!-- Header Section -->
-            <div class="header">
-                <div class="header-badge">ML Classification</div>
-                <h1 class="header-title">Churn Prediction</h1>
-                <p class="header-subtitle">Machine Learning Classification Model &mdash; AUF CCS</p>
-            </div>
-
-            <!-- Model Selector -->
-            <div class="model-selector-wrapper">
-                <label class="model-selector-label">Select Model</label>
-                <div class="model-selector" id="modelSelector">
-                    <div class="model-selector-highlight" id="modelHighlight"></div>
-                    <button type="button" class="model-option active" data-model="random_forest">
-                        <svg class="model-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17 18a5 5 0 0 0-10 0"></path>
-                            <line x1="12" y1="9" x2="12" y2="2"></line>
-                            <line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line>
-                            <line x1="1" y1="18" x2="3" y2="18"></line>
-                            <line x1="21" y1="18" x2="23" y2="18"></line>
-                            <line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line>
-                            <line x1="23" y1="22" x2="1" y2="22"></line>
-                            <polyline points="8 6 12 2 16 6"></polyline>
-                        </svg>
-                        Random Forest
-                    </button>
-                    <button type="button" class="model-option" data-model="xgboost">
-                        <svg class="model-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="13 17 18 12 13 7"></polyline>
-                            <polyline points="6 17 11 12 6 7"></polyline>
-                        </svg>
-                        XGBoost
-                    </button>
-                    <button type="button" class="model-option" data-model="gmm">
-                        <svg class="model-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <circle cx="12" cy="12" r="6"></circle>
-                            <circle cx="12" cy="12" r="2"></circle>
-                        </svg>
-                        GMM
-                    </button>
-                    <button type="button" class="model-option" data-model="dbscan">
-                        <svg class="model-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="7.5" cy="7.5" r="2.5"></circle>
-                            <circle cx="16.5" cy="7.5" r="2.5"></circle>
-                            <circle cx="7.5" cy="16.5" r="2.5"></circle>
-                            <circle cx="16.5" cy="16.5" r="2.5"></circle>
-                            <line x1="9.5" y1="8.5" x2="14.5" y2="8.5"></line>
-                            <line x1="8.5" y1="9.5" x2="8.5" y2="14.5"></line>
-                            <line x1="15.5" y1="9.5" x2="15.5" y2="14.5"></line>
-                        </svg>
-                        DBSCAN
-                    </button>
-                </div>
-            </div>
-
-            <!-- Main Card -->
-            <div class="card">
-
-                <!-- Prediction Form -->
-                <div id="predictionForm">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:8px;opacity:0.6">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            Customer Information
-                        </h2>
-                    </div>
-
-                    <form id="churnForm" class="form-grid">
-                        <!-- Tenure Input -->
-                        <div class="form-group">
-                            <label for="tenure">Tenure (months)</label>
-                            <input
-                                type="number"
-                                id="tenure"
-                                name="tenure"
-                                min="0"
-                                max="72"
-                                placeholder="0 - 72 months"
-                                required
-                            >
-                        </div>
-
-                        <!-- Monthly Charges Input -->
-                        <div class="form-group">
-                            <label for="MonthlyCharges">Monthly Charges ($)</label>
-                            <input
-                                type="number"
-                                id="MonthlyCharges"
-                                name="MonthlyCharges"
-                                min="0"
-                                step="0.01"
-                                placeholder="e.g. 79.99"
-                                required
-                            >
-                        </div>
-
-                        <!-- Contract Dropdown -->
-                        <div class="form-group">
-                            <label for="Contract">Contract Type</label>
-                            <select id="Contract" name="Contract" required>
-                                <option value="" disabled selected>Select contract</option>
-                                <option value="Month-to-month">Month-to-month</option>
-                                <option value="One year">One year</option>
-                                <option value="Two year">Two year</option>
-                            </select>
-                        </div>
-
-                        <!-- Internet Service Dropdown -->
-                        <div class="form-group">
-                            <label for="InternetService">Internet Service</label>
-                            <select id="InternetService" name="InternetService" required>
-                                <option value="" disabled selected>Select service</option>
-                                <option value="DSL">DSL</option>
-                                <option value="Fiber optic">Fiber optic</option>
-                                <option value="No">No</option>
-                            </select>
-                        </div>
-
-                        <!-- Submit Button (full width) -->
-                        <div class="form-group form-group-full">
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                </svg>
-                                <span>Get Prediction</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Results Section (Hidden by default) -->
-                <div id="resultsSection" class="hidden results-section">
-                    <div class="card-header">
-                        <h2 class="card-title">Prediction Result</h2>
-                    </div>
-
-                    <div id="resultCard" class="result-card">
-                        <p class="result-label">Predicted Outcome</p>
-                        <p id="predictionResult" class="result-value"></p>
-                        <div class="confidence-wrapper">
-                            <p class="result-confidence-label">Confidence Score</p>
-                            <div class="confidence-bar-track">
-                                <div class="confidence-bar-fill" id="confidenceBar" style="width: 0%"></div>
-                            </div>
-                            <span id="confidenceScore" class="result-confidence-value"></span>
-                        </div>
-                        <p class="result-model-label">Model: <span id="resultModelName"></span></p>
-                    </div>
-
-                    <!-- Clear Button -->
-                    <button type="button" onclick="resetForm()" class="btn btn-secondary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="1 4 1 10 7 10"></polyline>
-                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                        </svg>
-                        Make Another Prediction
-                    </button>
-                </div>
-
-            </div>
-
-            <!-- Model Insights Section -->
-            <div class="metrics-section">
-                <h2 class="metrics-title">Model Performance Metrics</h2>
-
-                <div class="metrics-grid">
-                    <!-- Accuracy Card -->
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                        </div>
-                        <div class="metric-value">82%</div>
-                        <p class="metric-label">Accuracy</p>
-                        <p class="metric-description">Overall prediction accuracy</p>
-                    </div>
-
-                    <!-- Precision Card -->
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <circle cx="12" cy="12" r="6"></circle>
-                                <circle cx="12" cy="12" r="2"></circle>
-                            </svg>
-                        </div>
-                        <div class="metric-value">79%</div>
-                        <p class="metric-label">Precision</p>
-                        <p class="metric-description">True positive classification</p>
-                    </div>
-
-                    <!-- Recall Card -->
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                        </div>
-                        <div class="metric-value">85%</div>
-                        <p class="metric-label">Recall</p>
-                        <p class="metric-description">Detection sensitivity</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="footer">
-                <p>Churn Prediction ML Model v1.0 &bull; AUF CCS &bull; 2026</p>
-            </div>
-
+        <!-- Model Selector -->
+        <div class="model-selector-wrapper">
+          <label class="model-selector-label">Select Model</label>
+          <div class="model-selector" id="modelSelector">
+            <div class="model-selector-highlight" id="modelHighlight"></div>
+            <button
+              type="button"
+              class="model-option active"
+              data-model="random_forest"
+            >
+              <svg
+                class="model-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 18a5 5 0 0 0-10 0"></path>
+                <line x1="12" y1="9" x2="12" y2="2"></line>
+                <line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line>
+                <line x1="1" y1="18" x2="3" y2="18"></line>
+                <line x1="21" y1="18" x2="23" y2="18"></line>
+                <line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line>
+                <line x1="23" y1="22" x2="1" y2="22"></line>
+                <polyline points="8 6 12 2 16 6"></polyline>
+              </svg>
+              Random Forest
+            </button>
+            <button type="button" class="model-option" data-model="xgboost">
+              <svg
+                class="model-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="13 17 18 12 13 7"></polyline>
+                <polyline points="6 17 11 12 6 7"></polyline>
+              </svg>
+              XGBoost
+            </button>
+            <button type="button" class="model-option" data-model="gmm">
+              <svg
+                class="model-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+              </svg>
+              GMM
+            </button>
+            <button type="button" class="model-option" data-model="dbscan">
+              <svg
+                class="model-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="7.5" cy="7.5" r="2.5"></circle>
+                <circle cx="16.5" cy="7.5" r="2.5"></circle>
+                <circle cx="7.5" cy="16.5" r="2.5"></circle>
+                <circle cx="16.5" cy="16.5" r="2.5"></circle>
+                <line x1="9.5" y1="8.5" x2="14.5" y2="8.5"></line>
+                <line x1="8.5" y1="9.5" x2="8.5" y2="14.5"></line>
+                <line x1="15.5" y1="9.5" x2="15.5" y2="14.5"></line>
+              </svg>
+              DBSCAN
+            </button>
+          </div>
         </div>
+
+        <!-- Main Card -->
+        <main class="card">
+          <!-- Prediction Form -->
+          <section id="predictionForm">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="
+                    display: inline;
+                    vertical-align: middle;
+                    margin-right: 8px;
+                    opacity: 0.6;
+                  "
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Customer Information
+              </h2>
+            </div>
+
+            <form id="churnForm" class="form-grid">
+              <!-- Tenure Input -->
+              <div class="form-group">
+                <label for="tenure">Tenure (months)</label>
+                <input
+                  type="number"
+                  id="tenure"
+                  name="tenure"
+                  min="0"
+                  max="72"
+                  placeholder="0 - 72 months"
+                  required
+                />
+              </div>
+
+              <!-- Monthly Charges Input -->
+              <div class="form-group">
+                <label for="MonthlyCharges">Monthly Charges ($)</label>
+                <input
+                  type="number"
+                  id="MonthlyCharges"
+                  name="MonthlyCharges"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 79.99"
+                  required
+                />
+              </div>
+
+              <!-- Contract Dropdown -->
+              <div class="form-group">
+                <label for="Contract">Contract Type</label>
+                <select id="Contract" name="Contract" required>
+                  <option value="" disabled selected>Select contract</option>
+                  <option value="Month-to-month">Month-to-month</option>
+                  <option value="One year">One year</option>
+                  <option value="Two year">Two year</option>
+                </select>
+              </div>
+
+              <!-- Internet Service Dropdown -->
+              <div class="form-group">
+                <label for="InternetService">Internet Service</label>
+                <select id="InternetService" name="InternetService" required>
+                  <option value="" disabled selected>Select service</option>
+                  <option value="DSL">DSL</option>
+                  <option value="Fiber optic">Fiber optic</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              <!-- Submit Button (full width) -->
+              <div class="form-group form-group-full">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline
+                      points="22 12 18 12 15 21 9 3 6 12 2 12"
+                    ></polyline>
+                  </svg>
+                  <span>Get Prediction</span>
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Results Section (Hidden by default) -->
+          <section id="resultsSection" class="hidden results-section">
+            <div class="card-header">
+              <h2 class="card-title">Prediction Result</h2>
+            </div>
+
+            <div id="resultCard" class="result-card">
+              <p class="result-label">Predicted Outcome</p>
+              <p id="predictionResult" class="result-value"></p>
+              <div class="confidence-wrapper">
+                <p class="result-confidence-label">Confidence Score</p>
+                <div class="confidence-bar-track">
+                  <div
+                    class="confidence-bar-fill"
+                    id="confidenceBar"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <span
+                  id="confidenceScore"
+                  class="result-confidence-value"
+                ></span>
+              </div>
+              <p class="result-model-label">
+                Model: <span id="resultModelName"></span>
+              </p>
+            </div>
+
+            <!-- Clear Button -->
+            <button
+              type="button"
+              onclick="resetForm()"
+              class="btn btn-secondary"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+              Make Another Prediction
+            </button>
+          </section>
+        </main>
+
+        <!-- Model Insights Section -->
+        <div class="metrics-section">
+          <h2 class="metrics-title">Model Performance Metrics</h2>
+
+          <div class="metrics-grid">
+            <!-- Accuracy Card -->
+            <div class="metric-card">
+              <div class="metric-icon">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+              <div class="metric-value">82%</div>
+              <p class="metric-label">Accuracy</p>
+              <p class="metric-description">Overall prediction accuracy</p>
+            </div>
+
+            <!-- Precision Card -->
+            <div class="metric-card">
+              <div class="metric-icon">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <circle cx="12" cy="12" r="6"></circle>
+                  <circle cx="12" cy="12" r="2"></circle>
+                </svg>
+              </div>
+              <div class="metric-value">79%</div>
+              <p class="metric-label">Precision</p>
+              <p class="metric-description">True positive classification</p>
+            </div>
+
+            <!-- Recall Card -->
+            <div class="metric-card">
+              <div class="metric-icon">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </div>
+              <div class="metric-value">85%</div>
+              <p class="metric-label">Recall</p>
+              <p class="metric-description">Detection sensitivity</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <p>Churn Prediction ML Model v1.0 &bull; AUF CCS &bull; 2026</p>
+        </div>
+      </div>
     </div>
 
     <!-- External JavaScript -->
-    <script src="{{ url_for('static', filename='css/js/script.js') }}"></script>
-</body>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
 </html>
