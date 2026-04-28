@@ -14,19 +14,29 @@ app = Flask(
 
 # Load all 4 model bundles
 models_dir = os.path.join(os.path.dirname(__file__), '..', 'models')
+MODELS_AVAILABLE = False
 
 bundles = {}
 for name in ['random_forest', 'xgboost', 'gmm', 'dbscan']:
     path = os.path.join(models_dir, f'{name}.joblib')
     try:
         bundles[name] = joblib.load(path)
-        print(f'Loaded {name}: {list(bundles[name].keys())}')
+        MODELS_AVAILABLE = True
+        print(f'✓ Loaded {name}: {list(bundles[name].keys())}')
     except FileNotFoundError:
-        print(f'Warning: Model file not found: {path}')
+        print(f'⚠ Model not found: {path}')
         bundles[name] = None
     except Exception as e:
-        print(f'Warning: Failed to load {name}: {str(e)}')
+        print(f'⚠ Failed to load {name}: {str(e)}')
         bundles[name] = None
+
+if not MODELS_AVAILABLE:
+    print('\n' + '='*60)
+    print('⚠ WARNING: No models loaded!')
+    print('Models must be deployed to external storage for production.')
+    print('For Vercel: Upload models to AWS S3, Google Cloud Storage, etc.')
+    print('For local testing: Ensure models/ directory exists with .joblib files')
+    print('='*60 + '\n')
 
 SUPERVISED = ['random_forest', 'xgboost']
 UNSUPERVISED = ['gmm', 'dbscan']
@@ -79,7 +89,16 @@ def predict():
 
         bundle = bundles[model_name]
         if bundle is None:
-            return jsonify({'success': False, 'error': f'Model {model_name} is not available. Models must be deployed separately.'}), 503
+            # Models not available - provide helpful error message
+            error_msg = (
+                f"Model '{model_name}' is not available.\n\n"
+                "SOLUTIONS:\n"
+                "1. LOCAL TESTING: Ensure models/ folder exists with .joblib files\n"
+                "2. VERCEL PRODUCTION: Upload models to AWS S3 or similar cloud storage\n"
+                "3. For demo purposes, set DEMO_MODE=True in code"
+            )
+            return jsonify({'success': False, 'error': error_msg}), 503
+            
         raw_features = {field: data.get(field, '') for field in FORM_FIELDS}
         X = encode_input(raw_features, bundle)
 

@@ -286,10 +286,73 @@ function formatModelName(model) {
 }
 
 /**
- * Show error message
+ * Show error message with formatting
  */
 function showError(message) {
-  alert(`Error: ${message}`);
+  const isDarkMode = document.documentElement.classList.contains('dark-mode');
+  
+  const bgColor = isDarkMode ? '#2d2d2d' : '#ffffff';
+  const textColor = isDarkMode ? '#f4f4f4' : '#525252';
+  const borderColor = '#da1e28';
+  const backdropColor = isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)';
+  
+  // Create error dialog
+  const errorHtml = `
+    <div style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: ${bgColor};
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      z-index: 10000;
+      border-left: 4px solid ${borderColor};
+    " id="errorModal">
+      <h3 style="color: ${borderColor}; margin-bottom: 1rem;">⚠️ Error</h3>
+      <p style="
+        color: ${textColor};
+        font-size: 0.95rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin-bottom: 1.5rem;
+        font-family: 'Courier New', monospace;
+      ">${escapeHtml(message)}</p>
+      <button onclick="document.getElementById('errorModal')?.remove(); document.getElementById('errorBackdrop')?.remove();" style="
+        background: #da1e28;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        font-family: inherit;
+      ">Dismiss</button>
+    </div>
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: ${backdropColor};
+      z-index: 9999;
+    " id="errorBackdrop" onclick="document.getElementById('errorModal')?.remove(); document.getElementById('errorBackdrop')?.remove();"></div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', errorHtml);
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 /**
