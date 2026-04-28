@@ -18,8 +18,15 @@ models_dir = os.path.join(os.path.dirname(__file__), '..', 'models')
 bundles = {}
 for name in ['random_forest', 'xgboost', 'gmm', 'dbscan']:
     path = os.path.join(models_dir, f'{name}.joblib')
-    bundles[name] = joblib.load(path)
-    print(f'Loaded {name}: {list(bundles[name].keys())}')
+    try:
+        bundles[name] = joblib.load(path)
+        print(f'Loaded {name}: {list(bundles[name].keys())}')
+    except FileNotFoundError:
+        print(f'Warning: Model file not found: {path}')
+        bundles[name] = None
+    except Exception as e:
+        print(f'Warning: Failed to load {name}: {str(e)}')
+        bundles[name] = None
 
 SUPERVISED = ['random_forest', 'xgboost']
 UNSUPERVISED = ['gmm', 'dbscan']
@@ -71,6 +78,8 @@ def predict():
             return jsonify({'success': False, 'error': f'Unknown model: {model_name}'}), 400
 
         bundle = bundles[model_name]
+        if bundle is None:
+            return jsonify({'success': False, 'error': f'Model {model_name} is not available. Models must be deployed separately.'}), 503
         raw_features = {field: data.get(field, '') for field in FORM_FIELDS}
         X = encode_input(raw_features, bundle)
 
