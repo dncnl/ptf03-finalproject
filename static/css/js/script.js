@@ -46,11 +46,13 @@ const ModelSelector = (() => {
   const MODEL_LABELS = {
     random_forest: 'Random Forest',
     xgboost: 'XGBoost',
+    svm: 'SVM',
     gmm: 'GMM',
-    dbscan: 'DBSCAN'
+    dbscan: 'DBSCAN',
+    apriori: 'Apriori'
   };
 
-  const SUPERVISED = ['random_forest', 'xgboost'];
+  const SUPERVISED = ['random_forest', 'xgboost', 'svm'];
 
   const init = () => {
     highlight = document.getElementById('modelHighlight');
@@ -156,16 +158,24 @@ const FormHandler = (() => {
 
     const supDiv = document.getElementById('supervisedResult');
     const unsupDiv = document.getElementById('unsupervisedResult');
+    const rulesDiv = document.getElementById('rulesResult');
     const badge = document.getElementById('resultTypeBadge');
+
+    supDiv.classList.add('hidden');
+    unsupDiv.classList.add('hidden');
+    if (rulesDiv) rulesDiv.classList.add('hidden');
 
     if (data.model_type === 'supervised') {
       supDiv.classList.remove('hidden');
-      unsupDiv.classList.add('hidden');
       badge.textContent = 'Supervised';
       badge.className = 'result-type-badge badge-supervised';
       showSupervisedResult(data);
+    } else if (data.model_type === 'rules') {
+      if (rulesDiv) rulesDiv.classList.remove('hidden');
+      badge.textContent = 'Association Rules';
+      badge.className = 'result-type-badge badge-unsupervised';
+      showRulesResult(data);
     } else {
-      supDiv.classList.add('hidden');
       unsupDiv.classList.remove('hidden');
       badge.textContent = 'Unsupervised';
       badge.className = 'result-type-badge badge-unsupervised';
@@ -220,12 +230,53 @@ const FormHandler = (() => {
     modelName.textContent = ModelSelector.getLabel();
   };
 
+  const showRulesResult = (data) => {
+    const card = document.getElementById('rulesCard');
+    const verdict = document.getElementById('rulesVerdict');
+    const bar = document.getElementById('rulesBar');
+    const scoreEl = document.getElementById('rulesScore');
+    const yesCount = document.getElementById('rulesYesCount');
+    const noCount = document.getElementById('rulesNoCount');
+    const baseRate = document.getElementById('rulesBaseRate');
+    const list = document.getElementById('rulesList');
+    const modelName = document.getElementById('resultModelNameRules');
+
+    card.classList.remove('result-success', 'result-danger', 'result-warning', 'result-cluster');
+    if (data.verdict === 'Churn Pattern') card.classList.add('result-danger');
+    else if (data.verdict === 'No Churn Pattern') card.classList.add('result-success');
+    else card.classList.add('result-cluster');
+
+    verdict.textContent = data.verdict;
+    scoreEl.textContent = data.confidence;
+    bar.style.width = '0%';
+    requestAnimationFrame(() => { bar.style.width = (data.score * 100) + '%'; });
+
+    yesCount.textContent = data.matched_yes_count;
+    noCount.textContent = data.matched_no_count;
+    baseRate.textContent = (data.base_rate * 100).toFixed(1) + '%';
+
+    list.innerHTML = '';
+    (data.top_rules || []).forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'rule-item ' + (r.consequent === 'Churn=Yes' ? 'rule-yes' : 'rule-no');
+      item.innerHTML =
+        '<div class="rule-ant">' + r.antecedents.join(' &nbsp;+&nbsp; ') + '</div>' +
+        '<div class="rule-arrow">&rarr; ' + r.consequent + '</div>' +
+        '<div class="rule-stats">conf ' + (r.confidence * 100).toFixed(0) + '% &middot; lift ' + r.lift.toFixed(2) + '</div>';
+      list.appendChild(item);
+    });
+
+    modelName.textContent = ModelSelector.getLabel();
+  };
+
   const resetForm = () => {
     if (form) form.reset();
     if (predictionForm) predictionForm.style.display = 'block';
     if (resultsSection) resultsSection.classList.add('hidden');
     document.getElementById('supervisedResult').classList.add('hidden');
     document.getElementById('unsupervisedResult').classList.add('hidden');
+    const r = document.getElementById('rulesResult');
+    if (r) r.classList.add('hidden');
   };
 
   return { init, resetForm };

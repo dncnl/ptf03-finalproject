@@ -1,5 +1,6 @@
 flask
 joblib
+mlxtend
 numpy
 pandas
 scikit-learn
