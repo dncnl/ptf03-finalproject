@@ -58,18 +58,85 @@ function initModelSelector() {
       options.forEach(o => o.classList.remove('active'));
       this.classList.add('active');
       moveHighlight(this);
+      updateMetricsDisplay(this.getAttribute('data-model'));
     });
   });
 
   const active = selector.querySelector('.model-option.active');
   if (active) {
-    // Defer until layout is complete
     requestAnimationFrame(() => moveHighlight(active));
+    updateMetricsDisplay(active.getAttribute('data-model'));
   }
 
   window.addEventListener('resize', () => {
     const a = selector.querySelector('.model-option.active');
     if (a) moveHighlight(a);
+  });
+}
+
+/* ── Metrics Per Model ──────────────────────────────────────── */
+
+const MODEL_METRICS = {
+  random_forest: [
+    { value: '76.6%', label: 'Accuracy',  desc: 'Overall correct predictions' },
+    { value: '54.3%', label: 'Precision', desc: 'True positive rate' },
+    { value: '74.3%', label: 'Recall',    desc: 'Detection sensitivity' },
+    { value: '62.8%', label: 'F1 Score',  desc: 'Balanced harmonic mean' },
+    { value: '0.834', label: 'AUC-ROC',   desc: 'Model discrimination' },
+    { value: '63.9%', label: 'Avg Prec.', desc: 'Area under PR curve' },
+  ],
+  xgboost: [
+    { value: '73.8%', label: 'Accuracy',  desc: 'Overall correct predictions' },
+    { value: '50.4%', label: 'Precision', desc: 'True positive rate' },
+    { value: '80.0%', label: 'Recall',    desc: 'Detection sensitivity' },
+    { value: '61.8%', label: 'F1 Score',  desc: 'Balanced harmonic mean' },
+    { value: '0.839', label: 'AUC-ROC',   desc: 'Model discrimination' },
+    { value: '65.2%', label: 'Avg Prec.', desc: 'Area under PR curve' },
+  ],
+  svm: [
+    { value: '74.4%', label: 'Accuracy',  desc: 'Overall correct predictions' },
+    { value: '51.2%', label: 'Precision', desc: 'True positive rate' },
+    { value: '77.0%', label: 'Recall',    desc: 'Detection sensitivity' },
+    { value: '61.5%', label: 'F1 Score',  desc: 'Balanced harmonic mean' },
+    { value: '~0.83', label: 'AUC-ROC',   desc: 'Model discrimination' },
+    { value: 'RBF',   label: 'Kernel',    desc: 'Non-linear boundary' },
+  ],
+  gmm: [
+    { value: '9',     label: 'Clusters',       desc: 'BIC-selected components' },
+    { value: '0.081', label: 'Silhouette',     desc: 'Cohesion vs separation' },
+    { value: '2.65',  label: 'Davies-Bouldin', desc: 'Lower is better' },
+    { value: '471',   label: 'Calinski-H.',    desc: 'Higher is better' },
+    { value: 'Soft',  label: 'Assignment',     desc: 'Probabilistic membership' },
+    { value: 'Full',  label: 'Covariance',     desc: 'Per-cluster shape' },
+  ],
+  dbscan: [
+    { value: '9',      label: 'Clusters',       desc: 'Density-based groups' },
+    { value: '-0.16',  label: 'Silhouette',     desc: 'Negative = overlap' },
+    { value: '1.29',   label: 'Davies-Bouldin', desc: 'Lower is better' },
+    { value: '105',    label: 'Calinski-H.',    desc: 'Higher is better' },
+    { value: '7.9%',   label: 'Noise',          desc: 'Unassigned points' },
+    { value: 'Hard',   label: 'Assignment',     desc: 'PCA pre-reduced' },
+  ],
+  apriori: [
+    { value: '300',    label: 'Rules',          desc: 'Top by lift retained' },
+    { value: '0.05',   label: 'Min Support',    desc: 'Frequency threshold' },
+    { value: '0.50',   label: 'Min Confidence', desc: 'P(consequent | ant)' },
+    { value: '2.72',   label: 'Top Lift',       desc: 'Strongest churn rule' },
+    { value: '~30K',   label: 'Frequent Sets',  desc: 'Itemsets mined' },
+    { value: 'Yes/No', label: 'Consequent',     desc: 'Churn outcome' },
+  ],
+};
+
+function updateMetricsDisplay(modelKey) {
+  const metrics = MODEL_METRICS[modelKey];
+  if (!metrics) return;
+  metrics.forEach((m, i) => {
+    const v = document.querySelector(`[data-metric="${i}"]`);
+    const l = document.querySelector(`[data-metric-label="${i}"]`);
+    const d = document.querySelector(`[data-metric-desc="${i}"]`);
+    if (v) v.textContent = m.value;
+    if (l) l.textContent = m.label;
+    if (d) d.textContent = m.desc;
   });
 }
 
