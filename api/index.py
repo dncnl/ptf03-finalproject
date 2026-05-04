@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
+
 # Configure Flask with absolute paths for Vercel serverless compatibility
 app = Flask(
     __name__,
