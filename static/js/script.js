@@ -156,16 +156,21 @@ function displayResults(result) {
   const placeholder       = document.getElementById('resultsPlaceholder');
   const supervisedResult  = document.getElementById('supervisedResult');
   const unsupervisedResult= document.getElementById('unsupervisedResult');
+  const rulesResult       = document.getElementById('rulesResult');
 
   placeholder.classList.add('hidden');
+  supervisedResult.classList.add('hidden');
+  unsupervisedResult.classList.add('hidden');
+  if (rulesResult) rulesResult.classList.add('hidden');
 
   if (result.model_type === 'supervised') {
     supervisedResult.classList.remove('hidden');
-    unsupervisedResult.classList.add('hidden');
     displaySupervisedResult(result);
+  } else if (result.model_type === 'rules') {
+    if (rulesResult) rulesResult.classList.remove('hidden');
+    displayRulesResult(result);
   } else {
     unsupervisedResult.classList.remove('hidden');
-    supervisedResult.classList.add('hidden');
     displayUnsupervisedResult(result);
   }
 
@@ -217,14 +222,67 @@ function displayUnsupervisedResult(result) {
   visual.innerHTML = '🎯';
 }
 
+function displayRulesResult(result) {
+  const isChurn = result.verdict === 'Churn Pattern';
+  const score   = result.score || 0;
+  const pct     = Math.round(score * 100);
+
+  const visual = document.getElementById('rulesVisual');
+  visual.innerHTML = isChurn ? '⚠️' : (result.verdict === 'No Churn Pattern' ? '✅' : '❔');
+  visual.className = `prediction-icon-wrap ${isChurn ? 'churn' : 'no-churn'}`;
+
+  const verdictEl = document.getElementById('rulesVerdict');
+  verdictEl.textContent = result.verdict;
+  verdictEl.className   = `result-value result-prediction ${isChurn ? 'churn' : 'no-churn'}`;
+
+  document.getElementById('rulesScore').textContent = `${pct}%`;
+  const bar = document.getElementById('rulesBar');
+  bar.style.width = '0%';
+  bar.style.background = isChurn
+    ? 'linear-gradient(90deg, hsl(4,74%,52%), hsl(4,74%,62%))'
+    : 'linear-gradient(90deg, hsl(152,60%,42%), hsl(152,60%,52%))';
+  requestAnimationFrame(() => setTimeout(() => { bar.style.width = `${pct}%`; }, 60));
+
+  document.getElementById('rulesYesCount').textContent  = result.matched_yes_count ?? 0;
+  document.getElementById('rulesNoCount').textContent   = result.matched_no_count  ?? 0;
+  document.getElementById('rulesBaseRate').textContent  = `${Math.round((result.base_rate || 0) * 100)}%`;
+  document.getElementById('resultModelNameRules').textContent = formatModelName(result.model);
+
+  const list = document.getElementById('rulesList');
+  list.innerHTML = '';
+  const top = result.top_rules || [];
+  if (top.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'rules-empty';
+    li.textContent = 'No rules matched this customer profile.';
+    list.appendChild(li);
+  } else {
+    top.forEach(r => {
+      const li = document.createElement('li');
+      const churnRule = r.consequent === 'Churn=Yes';
+      li.className = `rules-item ${churnRule ? 'churn' : 'no-churn'}`;
+      const ant = (r.antecedents || []).join(' + ');
+      li.innerHTML = `
+        <span class="rules-ant">${escapeHtml(ant)}</span>
+        <span class="rules-arrow">→</span>
+        <span class="rules-cons">${escapeHtml(r.consequent)}</span>
+        <span class="rules-meta">conf ${r.confidence} · lift ${r.lift}</span>
+      `;
+      list.appendChild(li);
+    });
+  }
+}
+
 /* ── Helpers ─────────────────────────────────────────────────── */
 
 function formatModelName(model) {
   const names = {
     random_forest: 'Random Forest',
     xgboost:       'XGBoost',
+    svm:           'Support Vector Machine',
     gmm:           'Gaussian Mixture Model',
     dbscan:        'DBSCAN',
+    apriori:       'Apriori',
   };
   return names[model] || model;
 }
@@ -282,6 +340,7 @@ function resetForm() {
   document.getElementById('resultsPlaceholder').classList.remove('hidden');
   document.getElementById('supervisedResult').classList.add('hidden');
   document.getElementById('unsupervisedResult').classList.add('hidden');
+  document.getElementById('rulesResult')?.classList.add('hidden');
 
   // Scroll back to form
   document.getElementById('predictionForm')
