@@ -345,7 +345,10 @@
               </div>
 
               <p class="result-label">Assigned Segment</p>
-              <p id="clusterName" class="result-value segment-value"></p>
+              <div class="segment-headline">
+                <p id="clusterName" class="result-value segment-value"></p>
+                <span id="clusterRiskPill" class="risk-pill hidden"></span>
+              </div>
               <p id="clusterDescription" class="cluster-description"></p>
 
               <div class="profile-grid">
@@ -365,6 +368,14 @@
                   <span class="profile-label">Segment Size</span>
                   <span id="profileSize" class="profile-value"></span>
                 </div>
+              </div>
+
+              <div class="segment-comparison">
+                <div class="comparison-header">
+                  <h3 class="comparison-title">All Segments Identified</h3>
+                  <p class="comparison-subtitle">Compare the assigned segment against the others this model discovered</p>
+                </div>
+                <div id="segmentComparisonList" class="comparison-list"></div>
               </div>
 
               <p class="unsup-note">Unsupervised models group customers by behavioral patterns — no direct churn label is assigned.</p>

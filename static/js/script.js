@@ -281,8 +281,70 @@ function displayUnsupervisedResult(result) {
   document.getElementById('profileSize').textContent        = result.profile?.size        || '—';
   document.getElementById('resultModelNameUnsup').textContent = formatModelName(result.model);
 
+  const pill = document.getElementById('clusterRiskPill');
+  if (pill) {
+    if (result.risk_label) {
+      pill.textContent = result.risk_label;
+      pill.className = `risk-pill risk-${result.risk_tier || 'medium'}`;
+    } else {
+      pill.classList.add('hidden');
+    }
+  }
+
   const visual = document.getElementById('clusterVisual');
-  visual.innerHTML = '🎯';
+  const visualEmoji = {
+    high: '🚨', medium: '⚠️', low: '🛡️', outlier: '❓'
+  }[result.risk_tier] || '🎯';
+  visual.innerHTML = visualEmoji;
+  visual.className = `cluster-icon-wrap risk-${result.risk_tier || 'medium'}`;
+
+  renderSegmentComparison(result.all_segments || [], result.cluster_id);
+}
+
+function renderSegmentComparison(segments, assignedId) {
+  const list = document.getElementById('segmentComparisonList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (!segments.length) {
+    list.innerHTML = '<p class="comparison-empty">No additional segments available for this model.</p>';
+    return;
+  }
+
+  segments.forEach(seg => {
+    const isAssigned = seg.is_assigned || seg.cluster_id === assignedId;
+    const tier = seg.risk_tier || 'medium';
+    const row = document.createElement('div');
+    row.className = `comparison-row risk-${tier}${isAssigned ? ' is-assigned' : ''}`;
+    row.innerHTML = `
+      <div class="comparison-row-head">
+        <div class="comparison-row-title">
+          <span class="comparison-row-name">${escapeHtml(seg.cluster_label)}</span>
+          ${seg.risk_label ? `<span class="risk-pill risk-${tier}">${escapeHtml(seg.risk_label)}</span>` : ''}
+        </div>
+        ${isAssigned ? '<span class="comparison-row-badge">Assigned</span>' : ''}
+      </div>
+      <div class="comparison-row-stats">
+        <div class="comparison-stat">
+          <span class="comparison-stat-label">Tenure</span>
+          <span class="comparison-stat-value">${escapeHtml(String(seg.avg_tenure))}</span>
+        </div>
+        <div class="comparison-stat">
+          <span class="comparison-stat-label">Monthly</span>
+          <span class="comparison-stat-value">${escapeHtml(String(seg.avg_monthly))}</span>
+        </div>
+        <div class="comparison-stat">
+          <span class="comparison-stat-label">Contract</span>
+          <span class="comparison-stat-value">${escapeHtml(String(seg.top_contract))}</span>
+        </div>
+        <div class="comparison-stat">
+          <span class="comparison-stat-label">Size</span>
+          <span class="comparison-stat-value">${escapeHtml(String(seg.size))}</span>
+        </div>
+      </div>
+    `;
+    list.appendChild(row);
+  });
 }
 
 /* ── Helpers ─────────────────────────────────────────────────── */

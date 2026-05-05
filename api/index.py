@@ -104,6 +104,51 @@ def predict_supervised(model_name, bundle, X):
     }
 
 
+def _to_float(v, default=0.0):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return default
+
+
+def risk_for_profile(profile, cluster_id):
+    """Heuristic churn-risk scoring derived from a segment's profile.
+
+    Tenure (low = risky), contract type (month-to-month = risky), and
+    monthly charges (high = mildly risky) drive the score. DBSCAN's noise
+    cluster (-1) is reported as 'Outliers' rather than scored.
+    """
+    if cluster_id == -1:
+        return {'tier': 'outlier', 'label': 'Outliers', 'score': None}
+
+    tenure = _to_float(profile.get('avg_tenure'))
+    monthly = _to_float(profile.get('avg_monthly'))
+    contract = str(profile.get('top_contract', '')).lower()
+
+    score = 0
+    if tenure < 12:    score += 40
+    elif tenure < 24:  score += 28
+    elif tenure < 48:  score += 14
+
+    if 'month-to-month' in contract:   score += 40
+    elif 'one year' in contract:       score += 18
+    elif 'two year' in contract:       score += 0
+    else:                              score += 20
+
+    if monthly >= 80:   score += 20
+    elif monthly >= 60: score += 12
+    elif monthly >= 40: score += 6
+
+    if score >= 65:
+        tier, label = 'high', 'High Risk'
+    elif score >= 35:
+        tier, label = 'medium', 'Medium Risk'
+    else:
+        tier, label = 'low', 'Low Risk'
+
+    return {'tier': tier, 'label': label, 'score': score}
+
+
 def predict_cluster(model_name, bundle, X):
     model = bundle['model']
     scaler = bundle['scaler']
@@ -122,13 +167,31 @@ def predict_cluster(model_name, bundle, X):
         cluster_id = int(model.labels_[model.core_sample_indices_[nearest_idx]])
 
     profile = profiles.get(cluster_id, profiles.get(0, {}))
+    assigned_risk = risk_for_profile(profile, cluster_id)
+
+    all_segments = []
+    for cid, p in sorted(profiles.items(), key=lambda kv: kv[0]):
+        cid_int = int(cid)
+        risk = risk_for_profile(p, cid_int)
+        all_segments.append({
+            'cluster_id': cid_int,
+            'cluster_label': 'Noise' if cid_int == -1 else f'Segment {cid_int}',
+            'is_assigned': cid_int == cluster_id,
+            'avg_tenure': str(p.get('avg_tenure', '?')),
+            'avg_monthly': str(p.get('avg_monthly', '?')),
+            'top_contract': str(p.get('top_contract', '?')),
+            'size': str(p.get('size', '?')),
+            'risk_tier': risk['tier'],
+            'risk_label': risk['label'],
+            'risk_score': risk['score']
+        })
 
     return {
         'success': True,
         'model_type': 'unsupervised',
         'model': model_name,
         'cluster_id': cluster_id,
-        'cluster_label': f'Segment {cluster_id}',
+        'cluster_label': 'Noise' if cluster_id == -1 else f'Segment {cluster_id}',
         'description': f'Avg {profile.get("avg_tenure", "?")} months tenure, '
                         f'${profile.get("avg_monthly", "?")}/mo, '
                         f'{profile.get("top_contract", "?")} contract',
@@ -137,7 +200,11 @@ def predict_cluster(model_name, bundle, X):
             'avg_monthly': str(profile.get('avg_monthly', '?')),
             'top_contract': str(profile.get('top_contract', '?')),
             'size': str(profile.get('size', '?'))
-        }
+        },
+        'risk_tier': assigned_risk['tier'],
+        'risk_label': assigned_risk['label'],
+        'risk_score': assigned_risk['score'],
+        'all_segments': all_segments
     }
 
 
