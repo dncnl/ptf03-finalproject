@@ -98,32 +98,33 @@ const MODEL_METRICS = {
     { value: '51.2%', label: 'Precision', desc: 'True positive rate' },
     { value: '77.0%', label: 'Recall',    desc: 'Detection sensitivity' },
     { value: '61.5%', label: 'F1 Score',  desc: 'Balanced harmonic mean' },
-    { value: '~0.83', label: 'AUC-ROC',   desc: 'Model discrimination' },
-    { value: 'RBF',   label: 'Kernel',    desc: 'Non-linear boundary' },
+    { value: '0.810', label: 'AUC-ROC',   desc: 'Model discrimination' },
+    { value: '60.2%', label: 'Avg Prec.', desc: 'Area under PR curve' },
   ],
+  // All three scored on identical X_scaled space (same denominator, same metric stack)
   gmm: [
-    { value: '9',     label: 'Clusters',       desc: 'BIC-selected components' },
-    { value: '0.081', label: 'Silhouette',     desc: 'Cohesion vs separation' },
-    { value: '2.65',  label: 'Davies-Bouldin', desc: 'Lower is better' },
-    { value: '471',   label: 'Calinski-H.',    desc: 'Higher is better' },
-    { value: 'Soft',  label: 'Assignment',     desc: 'Probabilistic membership' },
-    { value: 'Full',  label: 'Covariance',     desc: 'Per-cluster shape' },
+    { value: '9',      label: 'Clusters',       desc: 'BIC-selected components' },
+    { value: '100.0%', label: 'Coverage',       desc: '% customers assigned' },
+    { value: '0.091',  label: 'Silhouette',     desc: 'Cohesion vs separation' },
+    { value: '2.60',   label: 'Davies-Bouldin', desc: 'Lower is better' },
+    { value: '481',    label: 'Calinski-H.',    desc: 'Higher is better' },
+    { value: '0.767',  label: 'Unified AUC',    desc: 'External — predicts churn' },
   ],
   dbscan: [
     { value: '9',      label: 'Clusters',       desc: 'Density-based groups' },
-    { value: '-0.16',  label: 'Silhouette',     desc: 'Negative = overlap' },
-    { value: '1.29',   label: 'Davies-Bouldin', desc: 'Lower is better' },
-    { value: '105',    label: 'Calinski-H.',    desc: 'Higher is better' },
-    { value: '7.9%',   label: 'Noise',          desc: 'Unassigned points' },
-    { value: 'Hard',   label: 'Assignment',     desc: 'PCA pre-reduced' },
+    { value: '92.1%',  label: 'Coverage',       desc: '% customers assigned' },
+    { value: '-0.08',  label: 'Silhouette',     desc: 'Negative = overlap' },
+    { value: '2.80',   label: 'Davies-Bouldin', desc: 'Lower is better' },
+    { value: '76',     label: 'Calinski-H.',    desc: 'Higher is better' },
+    { value: '0.568',  label: 'Unified AUC',    desc: 'External — predicts churn' },
   ],
-  apriori: [
-    { value: '300',    label: 'Rules',          desc: 'Top by lift retained' },
-    { value: '0.05',   label: 'Min Support',    desc: 'Frequency threshold' },
-    { value: '0.50',   label: 'Min Confidence', desc: 'P(consequent | ant)' },
-    { value: '2.72',   label: 'Top Lift',       desc: 'Strongest churn rule' },
-    { value: '~30K',   label: 'Frequent Sets',  desc: 'Itemsets mined' },
-    { value: 'Yes/No', label: 'Consequent',     desc: 'Churn outcome' },
+  kmeans: [
+    { value: '2',      label: 'Clusters',       desc: 'Silhouette-selected k' },
+    { value: '100.0%', label: 'Coverage',       desc: '% customers assigned' },
+    { value: '0.157',  label: 'Silhouette',     desc: 'Cohesion vs separation' },
+    { value: '2.25',   label: 'Davies-Bouldin', desc: 'Lower is better' },
+    { value: '1304',   label: 'Calinski-H.',    desc: 'Higher is better' },
+    { value: '0.628',  label: 'Unified AUC',    desc: 'External — predicts churn' },
   ],
 };
 
@@ -223,19 +224,14 @@ function displayResults(result) {
   const placeholder       = document.getElementById('resultsPlaceholder');
   const supervisedResult  = document.getElementById('supervisedResult');
   const unsupervisedResult= document.getElementById('unsupervisedResult');
-  const rulesResult       = document.getElementById('rulesResult');
 
   placeholder.classList.add('hidden');
   supervisedResult.classList.add('hidden');
   unsupervisedResult.classList.add('hidden');
-  if (rulesResult) rulesResult.classList.add('hidden');
 
   if (result.model_type === 'supervised') {
     supervisedResult.classList.remove('hidden');
     displaySupervisedResult(result);
-  } else if (result.model_type === 'rules') {
-    if (rulesResult) rulesResult.classList.remove('hidden');
-    displayRulesResult(result);
   } else {
     unsupervisedResult.classList.remove('hidden');
     displayUnsupervisedResult(result);
@@ -289,40 +285,6 @@ function displayUnsupervisedResult(result) {
   visual.innerHTML = '🎯';
 }
 
-function displayRulesResult(result) {
-  document.getElementById('rulesVerdict').textContent = result.verdict || '—';
-
-  const score = result.score || 0;
-  const pct   = Math.round(score * 100);
-  document.getElementById('rulesScore').textContent = `${pct}%`;
-  const bar = document.getElementById('rulesBar');
-  bar.style.width = '0%';
-  const isChurn = result.verdict === 'Churn Pattern';
-  bar.style.background = isChurn
-    ? 'linear-gradient(90deg, hsl(4,74%,52%), hsl(4,74%,62%))'
-    : 'linear-gradient(90deg, hsl(152,60%,42%), hsl(152,60%,52%))';
-  requestAnimationFrame(() => setTimeout(() => { bar.style.width = `${pct}%`; }, 60));
-
-  document.getElementById('rulesYesCount').textContent = result.matched_yes_count ?? 0;
-  document.getElementById('rulesNoCount').textContent  = result.matched_no_count  ?? 0;
-  document.getElementById('rulesBaseRate').textContent = `${Math.round((result.base_rate || 0) * 100)}%`;
-  document.getElementById('resultModelNameRules').textContent = formatModelName(result.model);
-
-  const list = document.getElementById('rulesList');
-  list.innerHTML = '';
-  (result.top_rules || []).forEach(r => {
-    const cls = r.consequent === 'Churn=Yes' ? 'rule-yes' : 'rule-no';
-    const item = document.createElement('div');
-    item.className = `rule-item ${cls}`;
-    item.innerHTML = `
-      <div class="rule-ant">${r.antecedents.map(escapeHtml).join(' &nbsp;+&nbsp; ')}</div>
-      <div class="rule-arrow">&rarr; ${escapeHtml(r.consequent)}</div>
-      <div class="rule-stats">conf ${Math.round(r.confidence * 100)}% &middot; lift ${r.lift.toFixed(2)}</div>
-    `;
-    list.appendChild(item);
-  });
-}
-
 /* ── Helpers ─────────────────────────────────────────────────── */
 
 function formatModelName(model) {
@@ -332,7 +294,7 @@ function formatModelName(model) {
     svm:           'Support Vector Machine',
     gmm:           'Gaussian Mixture Model',
     dbscan:        'DBSCAN',
-    apriori:       'Apriori',
+    kmeans:        'K-Means',
   };
   return names[model] || model;
 }
@@ -390,7 +352,6 @@ function resetForm() {
   document.getElementById('resultsPlaceholder').classList.remove('hidden');
   document.getElementById('supervisedResult').classList.add('hidden');
   document.getElementById('unsupervisedResult').classList.add('hidden');
-  document.getElementById('rulesResult')?.classList.add('hidden');
 
   // Scroll back to form
   document.getElementById('predictionForm')
